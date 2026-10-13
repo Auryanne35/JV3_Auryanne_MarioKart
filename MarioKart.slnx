@@ -10,14 +10,14 @@
     <Platform Name="Win64-arm64ec" />
   </Configurations>
   <Folder Name="/Engine/">
-    <Project Path="Intermediate/ProjectFiles/UE5.vcxproj" Id="3de605d6-ba13-3023-8ada-bb8df56146e3">
+    <Project Path="Intermediate/ProjectFiles/UE5.vcxproj" Id="d4f656da-be9d-3679-8509-f2f68061f3d0">
       <BuildType Project="BuiltWithUnrealBuildTool" />
       <Platform Project="Win64" />
       <Build Project="false" />
     </Project>
   </Folder>
   <Folder Name="/Games/">
-    <Project Path="Intermediate/ProjectFiles/MarioKart.vcxproj" Id="3a4ae704-0226-3185-9417-c2c4c5fd56d8">
+    <Project Path="Intermediate/ProjectFiles/MarioKart.vcxproj" Id="f84c80de-46fd-3262-bd5e-4aa4b7f27e50">
       <BuildType Solution="DebugGame Editor|Win64" Project="DebugGame_Editor" />
       <BuildType Solution="DebugGame Editor|Win64-arm64" Project="Win64_arm64_DebugGame_Editor" />
       <BuildType Solution="DebugGame Editor|Win64-arm64ec" Project="Win64_arm64ec_DebugGame_Editor" />
