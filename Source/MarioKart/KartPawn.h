@@ -115,7 +115,7 @@ protected:
 	float GravityStrenght = 2500.f;
 	
 	UPROPERTY(EditAnywhere, Category = "Kart|Gravity")
-	float GravityTraceDistance = 80.f;
+	float GroundTraceDistance = 80.f;
 	
 	UPROPERTY(EditAnywhere, Category = "Kart|Gravity")
 	float RideHeight = 45.f;
