@@ -31,6 +31,26 @@ public:
 	
 	UFUNCTION(BlueprintPure, category = "Kart")
 	bool CanMove() const { return bCanMove; }
+	
+	UFUNCTION(BlueprintPure, category = "Kart")
+	FVector GetMoveDirection() const;
+	
+	void EnterLapZone(int32 ZoneIndex);
+	
+	UFUNCTION(BlueprintCallable, category = "Kart|Race")
+	void CompleteLap();
+	
+	UFUNCTION(BlueprintCallable, category = "Kart|Race")
+	void ResetRaceProgress();
+	
+	UFUNCTION(BlueprintPure, category = "Kart|Race")
+	int32 GetCurrentLap() const {return CurrentLap;}
+	
+	UFUNCTION(BlueprintPure, category = "Kart|Race")
+	bool HasFinishedRace() const {return bHasFinishedRace;}
+	
+	UFUNCTION(BlueprintPure, category = "Kart|Race")
+	float GetFinishedTime() const {return FinishTime;}
 
 protected:
 	//Called when the game starts or when spawned
@@ -266,6 +286,19 @@ protected:
 	//Faux pendant le compte à rebours
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|State")
 	bool bCanMove = true;
+	
+	//Tour en cours
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|Race")
+	int32 CurrentLap = 1;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|Race")
+	int32 NextCheckpoint = 1;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|Race")
+	bool bHasFinishedRace = false;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|Race")
+	float FinishTime = 0.f;
 	
 private:
 	
