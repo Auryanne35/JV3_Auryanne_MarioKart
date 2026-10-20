@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ArrowComponent.h"
 #include "GameFramework/Actor.h"
 #include "LapZone.generated.h"
 
@@ -14,13 +15,23 @@ class MARIOKART_API ALapZone : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ALapZone();
-
+	
+	UFUNCTION(BlueprintPure, category = "Kart|Lap")
+	int32 GetZoneIndex() const {return ZoneIndex;};
+	
+	UFUNCTION(BlueprintPure, category = "Kart|Lap")
+	bool IsGoingRightWay(const FVector& MoveDirection) const;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|Components")
+	TObjectPtr<UBoxComponent> Box;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|Components")
+	TObjectPtr<UArrowComponent> Arrow;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|Components", meta = (Clamp = "0"))
+	int32 ZoneIndex = 0;
 };
