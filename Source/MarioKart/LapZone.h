@@ -7,6 +7,11 @@
 #include "GameFramework/Actor.h"
 #include "LapZone.generated.h"
 
+class UBoxComponent;
+class UArrowComponent;
+class UPrimitiveComponent;
+struct FHitResult;
+
 UCLASS()
 class MARIOKART_API ALapZone : public AActor
 {
@@ -32,6 +37,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|Components")
 	TObjectPtr<UArrowComponent> Arrow;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|Components", meta = (Clamp = "0"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kart|Lap", meta = (Clamp = "0"))
 	int32 ZoneIndex = 0;
+	
+	//Coché = la boîte et la flèche restent visibles pendant le play (pratique pour tester)
+	// Décoché = visibles seulement dans l'éditeur, invisible en jeu
+	UPROPERTY(EditAnywhere, Category= "Kart|Lap")
+	bool bShowInGame = true;
+	
+private:
+	UFUNCTION()
+	void HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent,AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };
