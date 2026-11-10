@@ -3,15 +3,11 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/Engine.h"
-#include "Engine/LocalPlayer.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "GameFramework/PlayerController.h"
-#include "InputActionValue.h"
-
 #include "KartGameMode.h"
-#include "AI/NavigationSystemBase.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Items/KartItemComponent.h"
+#include "VerseVM/VVMRuntimeError.h"
+
 
 // Marge (en cm) sous les roues pour considérer que le kart touche le sol
 static constexpr float GroundSnapTolerance = 5.f;
@@ -51,6 +47,8 @@ AKartPawn::AKartPawn()
     WheelRearRight = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WheelRearRight"));
     WheelRearRight->SetupAttachment(BodyMesh);
     WheelRearRight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+   
+    ItemComponent = CreateDefaultSubobject<UKartItemComponent>(TEXT("ItemComponent"));
 
     // Caméra derrière et au-dessus du kart
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -152,45 +150,6 @@ void AKartPawn::ResetRaceProgress()
    FinishTime = 0.f;
 }
 
-void AKartPawn::NotifyControllerChanged()
-{
-    Super::NotifyControllerChanged();
-
-    // On donne au joueur les touches du kart
-    if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
-    {
-       if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-       {
-          Subsystem->AddMappingContext(KartMappingContext, 0);
-       }
-       
-    }
-}
-
-void AKartPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-    Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-    UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-    if (EnhancedInput == nullptr)
-    {
-       return;
-    }
-
-    // Triggered = tant qu'on appuie, Completed = quand on lâche
-    EnhancedInput->BindAction(ThrottleAction, ETriggerEvent::Triggered, this, &AKartPawn::OnThrottle);
-    EnhancedInput->BindAction(ThrottleAction, ETriggerEvent::Completed, this, &AKartPawn::OnThrottleReleased);
-
-    EnhancedInput->BindAction(SteerAction, ETriggerEvent::Triggered, this, &AKartPawn::OnSteer);
-    EnhancedInput->BindAction(SteerAction, ETriggerEvent::Completed, this, &AKartPawn::OnSteerReleased);
-
-    // Started = une seule fois au moment où on appuie
-    EnhancedInput->BindAction(DriftAction, ETriggerEvent::Started, this, &AKartPawn::OnDriftPressed);
-    EnhancedInput->BindAction(DriftAction, ETriggerEvent::Completed, this, &AKartPawn::OnDriftReleased);
-
-    EnhancedInput->BindAction(JumpAction, ETriggerEvent::Started, this, &AKartPawn::OnJumpPressed);
-}
-
 void AKartPawn::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
@@ -220,48 +179,22 @@ void AKartPawn::Tick(float DeltaTime)
     }
 }
 
-// ==================== Input ====================
-
-void AKartPawn::OnThrottle(const FInputActionValue& Value)
+void AKartPawn::SetThrottleInput(float Value)
 {
-    ThrottleInput = Value.Get<float>();
+   ThrottleInput = FMath::Clamp(Value, -1.f, 1.f);
 }
 
-void AKartPawn::OnThrottleReleased(const FInputActionValue& Value)
+void AKartPawn::SetSteerInput(float Value)
 {
-    ThrottleInput = 0.f;
+   SteerInput = FMath::Clamp(Value, -1.f, 1.f);
 }
 
-void AKartPawn::OnSteer(const FInputActionValue& Value)
+void AKartPawn::UseItem()
 {
-    SteerInput = Value.Get<float>();
-}
-
-void AKartPawn::OnSteerReleased(const FInputActionValue& Value)
-{
-    SteerInput = 0.f;
-}
-
-void AKartPawn::OnDriftPressed(const FInputActionValue& Value)
-{
-    // Le drift ne démarre que si on est au sol (StartDrift le vérifie)
-    if (bCanMove)
-    {
-       StartDrift();
-    }
-}
-
-void AKartPawn::OnDriftReleased(const FInputActionValue& Value)
-{
-    EndDrift();
-}
-
-void AKartPawn::OnJumpPressed(const FInputActionValue& Value)
-{
-    if (bCanMove)
-    {
-       Jump();
-    }
+   if (bCanMove)
+   {
+      ItemComponent->UseItem();
+   }
 }
 
 // ==================== Étapes du Tick ====================
@@ -613,6 +546,11 @@ void AKartPawn::Jump()
     {
        return;
     }
+   
+   if (!bCanMove)
+   {
+      return;
+   }
 
     // On donne une vitesse vers le haut, la gravité fera redescendre le kart
     VerticalSpeed = JumpVelocity;
@@ -628,6 +566,11 @@ void AKartPawn::StartDrift()
     {
        return;
     }
+   
+   if (!bCanMove)
+   {
+      return;
+   }
 
     bIsDrifting = true;
     DriftDirection = SteerInput > 0.f ? 1 : -1;
@@ -693,4 +636,11 @@ void AKartPawn::ShowDebugInfo() const
     GEngine->AddOnScreenDebugMessage(3, 0.f, FColor::Yellow, FString::Printf(TEXT("Boost: %.2f"), 
        BoostTimeRemaining));
 }
- 
+
+void AKartPawn::ApplyBoost(float Duration)
+{
+   if (Duration > 0.f)
+   {
+      StartBoost(Duration);
+   }
+}
