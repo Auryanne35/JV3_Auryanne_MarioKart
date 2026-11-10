@@ -79,9 +79,6 @@ protected:
 	//Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
-	//Permet de changer le controller pendant le jeu
-	virtual void NotifyControllerChanged() override;
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|components")
 	TObjectPtr<USphereComponent> CollisionSphere;
 	
