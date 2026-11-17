@@ -28,7 +28,7 @@ void ARotatingObject::BeginPlay()
 	
 	if (bRandomStartPhase)
 	{
-		AnimationTime = FMath::RandRange(0.f, 1.f / BobFrequency);
+		AnimationTime = FMath::FRandRange(0.f, 1.f / BobFrequency);
 		AnimatedRoot -> AddLocalRotation(RotationSpeed * AnimationTime);
 	}
 }

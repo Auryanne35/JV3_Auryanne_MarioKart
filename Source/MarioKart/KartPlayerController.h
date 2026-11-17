@@ -8,6 +8,7 @@
 
 class UKartCountdownWidget;
 class UKartRaceHUD;
+class UKartItemWidget;
 class UInputMappingContext;
 class UInputAction;
 class AKartPawn;
@@ -27,6 +28,9 @@ protected:
 	// Widget du compte à rebours à afficher (mettre WBP_Countdown ici dans BP_KartPlayerController)
 	UPROPERTY(EditAnywhere, Category = "Kart|UI")
 	TSubclassOf<UKartCountdownWidget> CountdownWidgetClass;
+	
+	UPROPERTY(EditAnywhere, Category = "Kart|UI")
+	TSubclassOf<UKartRaceHUD> ItemWidgetClass;
 
 	// Widget du chrono et des tours (mettre WBP_RaceHud ici dans BP_KartPlayerController)
 	UPROPERTY(EditAnywhere, Category = "Kart|UI")
@@ -65,6 +69,9 @@ private:
 	
 	UPROPERTY()
 	TObjectPtr<UKartCountdownWidget> CountdownWidget;
+	
+	UPROPERTY()
+	TObjectPtr<UKartItemWidget> ItemWidget;
 
 	UPROPERTY()
 	TObjectPtr<UKartRaceHUD> RaceHudWidget;

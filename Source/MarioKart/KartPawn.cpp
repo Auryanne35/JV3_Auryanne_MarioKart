@@ -161,6 +161,8 @@ void AKartPawn::Tick(float DeltaTime)
        ThrottleInput = 0.f;
        SteerInput = 0.f;
     }
+   
+   UpdateSpinOut(DeltaTime);
 
     // Chaque étape est une petite fonction, appelée dans l'ordre
     UpdateGround(DeltaTime);
@@ -191,7 +193,7 @@ void AKartPawn::SetSteerInput(float Value)
 
 void AKartPawn::UseItem()
 {
-   if (bCanMove)
+   if (bCanMove && !IsSpinningOut())
    {
       ItemComponent->UseItem();
    }
@@ -413,15 +415,14 @@ void AKartPawn::UpdateVisuals(float DeltaTime)
     // En drift, le châssis se met de travers
     // (la cible monte avec DriftBlend pour que le châssis pivote en douceur)
     const float TargetSlideYaw = bIsDrifting ? DriftDirection * DriftSlideAngle * FMath::SmoothStep(0.f, 1.f, DriftBlend) : 0.f;
-    const float CurrentSlideYaw = BodyMesh->GetRelativeRotation().Yaw - BodyBaseRotation.Yaw;
-    const float NewSlideYaw = FMath::FInterpTo(CurrentSlideYaw, TargetSlideYaw, DeltaTime, DriftSlideInterSpeed);
+    BodySlideYaw = FMath::FInterpTo(BodySlideYaw, TargetSlideYaw, DeltaTime, DriftSlideInterpSpeed);
 
     FRotator BodyRotation = BodyBaseRotation;
-    BodyRotation.Yaw += NewSlideYaw;
+    BodyRotation.Yaw += BodySlideYaw + SpinOutYaw;
     BodyMesh->SetRelativeRotation(BodyRotation);
 
     // La caméra suit le châssis avec du retard pour rester derrière l'arrière du kart sans tourner d'un coup
-    CameraSlideYaw = FMath::FInterpTo(CameraSlideYaw, NewSlideYaw * CameraDriftFollow, DeltaTime, CameraDriftInterSpeed);
+    CameraSlideYaw = FMath::FInterpTo(CameraSlideYaw, BodySlideYaw * CameraDriftFollow, DeltaTime, CameraDriftInterpSpeed);
 
     // Dans les petites pentes la caméra reste droite, elle ne s'incline qu'au-delà de CameraSlopeDeadZone
     // (on retire la zone morte pour que la caméra commence à s'incliner depuis 0, sans à-coup)
@@ -547,7 +548,7 @@ void AKartPawn::Jump()
        return;
     }
    
-   if (!bCanMove)
+   if (!bCanMove || IsSpinningOut())
    {
       return;
    }
@@ -567,7 +568,7 @@ void AKartPawn::StartDrift()
        return;
     }
    
-   if (!bCanMove)
+   if (!bCanMove || IsSpinningOut())
    {
       return;
    }
@@ -643,4 +644,40 @@ void AKartPawn::ApplyBoost(float Duration)
    {
       StartBoost(Duration);
    }
+}
+
+void AKartPawn::SpinOut(float Duration)
+{
+   if (Duration <= 0.f || IsSpinningOut())
+   {
+      return;
+   }
+   
+   SpinOutTotalTime = Duration;
+   SpinOutTimeRemaining = Duration;
+   
+   CurrentSpeed *= SpinOutSpeedFactor;
+   BoostTimeRemaining = 0.f;
+   bIsDrifting = false;
+   DriftDirection = 0;
+   DriftChargeTime = 0.f;
+}
+
+void AKartPawn::UpdateSpinOut(float DeltaTime)
+{
+   if (!IsSpinningOut())
+   {
+      SpinOutYaw = 0.f;
+      return;
+   }
+   
+   SpinOutTimeRemaining = FMath::Max(0.f, SpinOutTimeRemaining-DeltaTime);
+   
+   ThrottleInput = 0.f;
+   SteerInput = 0.f;
+   
+   const float Progress = 1.f - SpinOutTimeRemaining / SpinOutTotalTime;
+   
+   const float EaseOut = 1.f - FMath::Square(1.f - Progress);
+   SpinOutYaw = 360.f * SpinOutTurns * EaseOut; 
 }

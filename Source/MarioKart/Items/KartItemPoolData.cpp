@@ -22,12 +22,12 @@ UKartItemData* UKartItemPoolData::PickRandomItem() const
 		return nullptr;
 	}
 	
-	float Roll = FMath::RandRange(0.0f, TotalWeight);
+	float Roll = FMath::FRandRange(0.0f, TotalWeight);
 	
 	UKartItemData* LastValidItem = nullptr;
 	for (const FKartItemPoolEntry& Entry : Entries)
 	{
-		if (Entry.Item != nullptr || Entry.Weight <= 0.f)
+		if (Entry.Item == nullptr || Entry.Weight <= 0.f)
 		{
 			continue;
 		}

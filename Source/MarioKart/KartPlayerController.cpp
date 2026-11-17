@@ -10,6 +10,7 @@
 #include "KartCountdownWidget.h"
 #include "KartPawn.h"
 #include "KartRaceHUD.h"
+#include "Items/KartItemWidget.h"
 
 void AKartPlayerController::BeginPlay()
 {
@@ -37,6 +38,15 @@ void AKartPlayerController::BeginPlay()
 			CountdownWidget->AddToViewport();
 		}
 	}
+	
+	if (ItemWidgetClass != nullptr)
+	{
+		ItemWidget = CreateWidget<UKartItemWidget>(this, ItemWidgetClass);
+		if (ItemWidget != nullptr)
+		{
+			ItemWidget->AddToViewport();
+		}
+	}
 
 	if (RaceHudWidgetClass != nullptr)
 	{
@@ -53,7 +63,7 @@ void AKartPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 	
 	UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent);
-	if (EnhancedInput != nullptr)
+	if (EnhancedInput == nullptr)
 	{
 		return;
 	}

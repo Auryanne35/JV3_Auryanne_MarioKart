@@ -56,7 +56,7 @@ void UKartItemComponent::FinishRoulette()
 
 void UKartItemComponent::UseItem()
 {
-	if (bRouletteRunning || CurrentItem != nullptr)
+	if (bRouletteRunning || CurrentItem == nullptr)
 	{
 		return;
 	}

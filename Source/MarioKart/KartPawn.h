@@ -72,6 +72,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category= "Kart|Items")
 	void ApplyBoost (float Duration);
 	
+	UFUNCTION(BlueprintCallable, Category= "Kart|Items")
+	void SpinOut (float Duration);
+	
+	UFUNCTION(BlueprintPure, Category= "Kart|Items")
+	bool IsSpinningOut() const {return SpinOutTimeRemaining > 0.f; }
+	
 	UFUNCTION(BlueprintPure, Category="Kart|Items")
 	UKartItemComponent* GetItemComponent() const {return ItemComponent;}
 
@@ -184,7 +190,7 @@ protected:
 	
 	//Vitesse à laquelle le chassi rejoint son angle
 	UPROPERTY(EditAnywhere, Category = "Kart|Drift")
-	float DriftSlideInterSpeed = 6.f;
+	float DriftSlideInterpSpeed = 6.f;
 	
 	//Temps de drift pour obtenir le mini-turbo (bleu)
 	UPROPERTY(EditAnywhere, Category = "Kart|Drift")
@@ -231,7 +237,7 @@ protected:
 	
 	//Vitesse à laquelle la caméra rattrape l'angle du châssis 
 	UPROPERTY(EditAnywhere, Category = "Kart|Camera")
-	float CameraDriftInterSpeed = 3.f;
+	float CameraDriftInterpSpeed = 3.f;
 	
 	// EN-dessous de cette pente, la caméra ne s'incline pas du tout
 	UPROPERTY(EditAnywhere, Category = "Kart|Camera", meta = (ClampMin = "0", ClampMax = "90"))
@@ -248,6 +254,12 @@ protected:
 	//Affiche la vitesse et l'état du drift à l'écran
 	UPROPERTY(EditAnywhere, Category = "Kart|Visual")
 	bool bShowDebug = true;
+	
+	UPROPERTY(EditAnywhere, Category = "Kart|SpinOut", meta = (ClampMin = "0"))
+	int32 SpinOutTurns = 2;
+	
+	UPROPERTY(EditAnywhere, Category = "Kart|SpinOut", meta = (ClampMin = "0", ClampMax="1"))
+	float SpinOutSpeedFactor = 0.6f;
 	
 	//état
 	
@@ -293,6 +305,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|State")
 	bool bCanMove = true;
 	
+	UPROPERTY(VisibleAnywhere, Category = "Kart|State")
+	float SpinOutTimeRemaining = 0.f;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Kart|State")
+	float SpinOutTotalTime = 0.f;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Kart|State")
+	float SpinOutYaw = 0.f;
+	
 	//Tour en cours
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Kart|Race")
 	int32 CurrentLap = 1;
@@ -329,6 +350,8 @@ private:
 	//Visuel des roues
 	void SetWheelRotation(UStaticMeshComponent* Wheel, const FRotator& BaseRotation, float SteerAngle) const;
 	
+	void UpdateSpinOut(float DeltaTime);
+	
 	//Rotation de départ placé dans le blueprint
 	FRotator BodyBaseRotation;
 	FRotator SpringArmBaseRotation;
@@ -336,6 +359,8 @@ private:
 	FRotator WheelFrontRightBaseRotation;
 	FRotator WheelRearLeftBaseRotation;
 	FRotator WheelRearRightBaseRotation;
+	
+	float BodySlideYaw = 0.f;
 	
 	//Angle de l acaméra pendant le drift
 	float CameraSlideYaw = 0.f;

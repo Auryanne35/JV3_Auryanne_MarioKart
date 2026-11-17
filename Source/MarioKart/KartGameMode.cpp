@@ -10,6 +10,7 @@
 #include "KartPawn.h"
 //#include "KartPLayerController.h"
 //#include "LapZone.h
+#include "LapZone.h"
 #include "TimerManager.h"
 
 AKartGameMode::AKartGameMode()
@@ -23,7 +24,7 @@ void AKartGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//CountCheckpoints();
+	CountCheckpoints();
 	
 	if (bUseCountdown)
 	{
@@ -146,15 +147,35 @@ void AKartGameMode::SetAllKartsCanMove(bool bCanMove) const
 	}
 }
 
-/*
+
 void AKartGameMode::CountCheckpoints()
 {
 	CheckpointCount = 0;
 	bool bHasFinishLine = false;
 	
-	for 
+	for (TActorIterator<ALapZone> It(GetWorld()); It; ++It)
+	{
+		const int32 ZoneIndex = It->GetZoneIndex();
+		
+		if (ZoneIndex == 0)
+		{
+			bHasFinishLine = true;
+		}
+		
+		CheckpointCount = FMath::Max(CheckpointCount, ZoneIndex);
+	}
+	
+	if (!bHasFinishLine)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Aucune ALapZone avec ZoneIndex = 0 : il n'y a pas de ligne d'arrivée, les tours ne seront jamais comptés"));
+	}
+	
+	else if (CheckpointCount == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Aucun checkpoint (ALapZone avec ZoneIndex >= 1) : on peut valider des tours en faisant des allers-retours sur la ligne"))
+	}
 }
-*/
+
 
 void AKartGameMode::ShowRaceDebugText() const
 {

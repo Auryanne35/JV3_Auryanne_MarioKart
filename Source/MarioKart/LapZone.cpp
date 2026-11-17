@@ -49,7 +49,7 @@ bool ALapZone::IsGoingRightWay(const FVector& MoveDirection) const
 void ALapZone::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent,AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AKartPawn* Kart = Cast<AKartPawn>(OtherActor);
-	if (Kart != nullptr)
+	if (Kart == nullptr)
 	{
 		return;
 	}
